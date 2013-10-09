@@ -5,8 +5,6 @@
 package window;
 
 import java.awt.Canvas;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 
