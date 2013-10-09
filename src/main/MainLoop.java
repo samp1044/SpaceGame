@@ -4,6 +4,7 @@
  */
 package main;
 
+import window.KeyList;
 import window.Fenster;
 import units.Thruster;
 import units.Ship;
@@ -44,11 +45,6 @@ public class MainLoop extends Canvas implements Runnable {
     public static int mausX;
     public static int mausY;
     
-    public static boolean W_pressed;
-    public static boolean A_pressed;
-    public static boolean S_pressed;
-    public static boolean D_pressed;
-    
     public MainLoop() {
         this.setIgnoreRepaint(true);
         this.setSize(800,600);
@@ -74,10 +70,10 @@ public class MainLoop extends Canvas implements Runnable {
         mausX = 0;
         mausY = 0;
         
-        W_pressed = false;
-        A_pressed = false;
-        S_pressed = false;
-        D_pressed = false;
+        KeyList.FORWARD_Key_down = false;
+        KeyList.BACKWARD_Key_down = false;
+        KeyList.LEFT_Key_down = false;
+        KeyList.RIGHT_Key_down = false;
         
         ship = new Ship("dummy.jpg",50,50,50,50);
         
@@ -104,26 +100,26 @@ public class MainLoop extends Canvas implements Runnable {
             }
             
             if (focus) {
-                if(W_pressed) {
+                if(KeyList.FORWARD_Key_down) {
                     ship.throttleForward();
                 }
 
-                if (A_pressed) {
+                if (KeyList.LEFT_Key_down) {
                     ship.throttleLeft();
                 }
 
-                if (S_pressed) {
+                if (KeyList.BACKWARD_Key_down) {
                     ship.throttleBackward();
                 }
 
-                if (D_pressed) {
+                if (KeyList.RIGHT_Key_down) {
                     ship.throttleRight();
                 }
             } else {
-                W_pressed = false;
-                A_pressed = false;
-                S_pressed = false;
-                D_pressed = false;
+             KeyList.FORWARD_Key_down = false;
+             KeyList.BACKWARD_Key_down = false;
+             KeyList.LEFT_Key_down = false;
+             KeyList.RIGHT_Key_down = false;
             }
             
             ship.updateShip(mausX,mausY);

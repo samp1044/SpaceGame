@@ -6,7 +6,6 @@ package window;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import main.MainLoop;
 
 /**
  *
@@ -22,20 +21,20 @@ public class OwnKeyListener implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_W:
-                MainLoop.W_pressed = true;
+            case KeyList.FORWARD:
+                KeyList.FORWARD_Key_down = true;
                 break;
                 
-            case KeyEvent.VK_A:
-                MainLoop.A_pressed = true;
+            case KeyList.LEFT:
+                KeyList.LEFT_Key_down = true;
                 break;
                 
-            case KeyEvent.VK_S:
-                MainLoop.S_pressed = true;
+            case KeyList.BACKWARD:
+                KeyList.BACKWARD_Key_down = true;
                 break;
                 
-            case KeyEvent.VK_D:
-                MainLoop.D_pressed = true;
+            case KeyList.RIGHT:
+                KeyList.RIGHT_Key_down = true;
                 break;
         }
         
@@ -44,20 +43,20 @@ public class OwnKeyListener implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_W:
-                MainLoop.W_pressed = false;
+            case KeyList.FORWARD:
+                KeyList.FORWARD_Key_down = false;
                 break;
                 
-            case KeyEvent.VK_A:
-                MainLoop.A_pressed = false;
+            case KeyList.LEFT:
+                KeyList.LEFT_Key_down = false;
                 break;
                 
-            case KeyEvent.VK_S:
-                MainLoop.S_pressed = false;
+            case KeyList.BACKWARD:
+                KeyList.BACKWARD_Key_down = false;
                 break;
                 
-            case KeyEvent.VK_D:
-                MainLoop.D_pressed = false;
+            case KeyList.RIGHT:
+                KeyList.RIGHT_Key_down = false;
                 break;
         }
     }
