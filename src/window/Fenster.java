@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 public class Fenster extends JFrame {
     private int height;
     private int width;
+    //change has happened
     
     public Fenster(Canvas canvas) {
         setTitle("Space Game");
