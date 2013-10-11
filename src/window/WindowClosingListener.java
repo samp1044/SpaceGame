@@ -7,20 +7,23 @@ package window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import main.MainLoop;
+import utils.Logger;
 
 /**
  *
  * @author Sami
  */
 public class WindowClosingListener implements WindowListener {
-    
+    Logger logger = new Logger(WindowClosingListener.class);
+            
     public WindowClosingListener() {
         
     }
     
     @Override
     public void windowClosing(WindowEvent e) {
-        System.out.println("Fenster geschlossen");
+        logger.info("Main Window closed");
+        logger.info("Exiting Program");
         System.exit(0);
     }
     
@@ -29,7 +32,7 @@ public class WindowClosingListener implements WindowListener {
     
     @Override
     public void windowOpened(WindowEvent e) {
-        System.out.println("fenster offen");
+        logger.info("Main Window opened");
     }
     
     @Override
@@ -40,13 +43,13 @@ public class WindowClosingListener implements WindowListener {
 
     @Override
     public void windowActivated(WindowEvent e) {
-        System.out.println("activated");
+        logger.info("Main Window activated");
         MainLoop.focus = true;
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        System.out.println("not activated");
+        logger.info("Main Window not activated");
         MainLoop.focus = false;
     }
 }

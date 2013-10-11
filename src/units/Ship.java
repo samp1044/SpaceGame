@@ -4,10 +4,12 @@
  */
 package units;
 
+import support.Background;
 import utils.Vector2D;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import utils.Logger;
 
 /**
  *
@@ -19,6 +21,8 @@ public class Ship {
     private int width;
     private int height;
     
+    private float realMiddleX;
+    private float realMiddleY;
     private float middleX;
     private float middleY;
     private float posX;
@@ -33,6 +37,8 @@ public class Ship {
     private Thruster[] thrusterBackLeft;
     private Thruster[] thrusterFrontRight;
     private Thruster[] thrusterBackRight;
+    
+    Logger logger = new Logger(Ship.class);
     
     public Ship(String file,int width,int height,int x,int y) {
         this.img = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/ships/"+file));
@@ -49,6 +55,9 @@ public class Ship {
         this.middleX = this.posX + (width / 2.0F);
         this.middleY = this.posY + (height / 2.0F);
         
+        this.realMiddleX = this.middleX;
+        this.realMiddleY = this.middleY;
+        
         this.direction = new Vector2D(0,-1);
         this.force = new Vector2D(0,0);
         
@@ -61,35 +70,37 @@ public class Ship {
         this.thrusterBackRight = new Thruster[0];
     }
     
-    public void updateShip(int mausX,int mausY) {
-        this.middleX = this.middleX + this.force.getX();
-        this.middleY = this.middleY + this.force.getY();
+    public void updateShip(int mausX,int mausY,int canvasWidth,int canvasHeight) {
+        this.realMiddleX = (-Background.X) + (canvasWidth / 2); //Die Realen X Koordinaten (mit dem Background abgestimmt und POSITIV, werden aktualisiert:
+        this.realMiddleY = (-Background.Y) + (canvasHeight / 2);//Background koordinate + hälfte der Fensterbreite bzw Fensterhöhe
+        
+        Background.move(this.force); //Statt das schiff mit force zu bewegen wird der Background mit Force bewegt
         
         this.posX = this.middleX - (this.width / 2.0F);
         this.posY = this.middleY - (this.height / 2.0F);
         
         for (int i = 0;i < this.thrusterForward.length; i++) {
-            this.thrusterForward[i].updatePositionData(middleX, middleY);
+            this.thrusterForward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         for (int i = 0;i < this.thrusterBackward.length; i++) {
-            this.thrusterBackward[i].updatePositionData(middleX, middleY);
+            this.thrusterBackward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         for (int i = 0;i < this.thrusterFrontLeft.length; i++) {
-            this.thrusterFrontLeft[i].updatePositionData(middleX, middleY);
+            this.thrusterFrontLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         for (int i = 0;i < this.thrusterBackLeft.length; i++) {
-            this.thrusterBackLeft[i].updatePositionData(middleX, middleY);
+            this.thrusterBackLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         for (int i = 0;i < this.thrusterFrontRight.length; i++) {
-            this.thrusterFrontRight[i].updatePositionData(middleX, middleY);
+            this.thrusterFrontRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         for (int i = 0;i < this.thrusterBackRight.length; i++) {
-            this.thrusterBackRight[i].updatePositionData(middleX, middleY);
+            this.thrusterBackRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
         }
         
         manageRotation(mausX, mausY);
@@ -329,5 +340,23 @@ public class Ship {
     
     public float getMiddleY() {
         return this.middleY;
+    }
+    
+    public void setMiddleX(float middleX) {
+        this.middleX = middleX;
+        this.posX = middleX - (this.width / 2);
+    }
+    
+    public void setMiddleY(float middleY) {
+        this.middleY = middleY;
+        this.posY = middleY - (this.height / 2);
+    }
+    
+    public float getRealMiddleX() {
+        return this.realMiddleX;
+    }
+    
+    public float getRealMiddleY() {
+        return this.realMiddleY;
     }
 }

@@ -4,10 +4,12 @@
  */
 package units;
 
+import support.Background;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import main.MainLoop;
+import support.Settings;
 import utils.Vector2D;
 
 /**
@@ -29,6 +31,9 @@ public class Thruster {
     
     private float thrustStrength;
     
+    private int shipRealMiddleX;
+    private int shipRealMiddleY;
+    
     private int shipMiddleX;
     private int shipMiddleY;
     private int xOffset;
@@ -43,10 +48,13 @@ public class Thruster {
     private double ParticleOutputMultiplicator;
     private double ParticleOutputRotationAngle;
     
-    public Thruster(int type,int width,int height, float thrustStrength,float shipMiddleX,float shipMiddleY,int xOffset,int yOffset,double rotationDegree) {
+    public Thruster(int type,int width,int height, float thrustStrength,float shipMiddleX,float shipMiddleY,float shipRealMiddleX, float shipRealMiddleY, int xOffset,int yOffset,double rotationDegree) {
         this.type = type;
         this.thrustStrength = thrustStrength;
         this.isActive = false;
+        
+        this.shipRealMiddleX = (int)shipRealMiddleX;
+        this.shipRealMiddleY = (int)shipRealMiddleY;
         
         this.shipMiddleX = (int)shipMiddleX;
         this.shipMiddleY = (int)shipMiddleY;
@@ -87,9 +95,12 @@ public class Thruster {
         this.ParticleOutputMultiplicator = 1;
     }
     
-    public void updatePositionData(float shipMiddleX,float shipMiddleY) {
+    public void updatePositionData(float shipMiddleX,float shipMiddleY,float shipRealMiddleX,float shipRealMiddleY) {
         this.shipMiddleX = (int)shipMiddleX;
         this.shipMiddleY = (int)shipMiddleY;
+        
+        this.shipRealMiddleX = (int)shipRealMiddleX;
+        this.shipRealMiddleY = (int)shipRealMiddleY;
         
         this.posX = this.shipMiddleX + this.xOffset;
         this.posY = this.shipMiddleY + this.yOffset;
@@ -109,14 +120,14 @@ public class Thruster {
                 this.actualImg = 0;
             }
             
-            if (direction != null && MainLoop.particlesEnabled) {
+            if (direction != null && Settings.particlesEnabled) {
                 direction = direction.getUnitVector().multiplyWithNumber(-1);
                 direction = direction.getRotatedVector(this.ParticleOutputRotationAngle).getUnitVector();
                 direction = direction.multiplyWithNumber(this.ParticleOutputMultiplicator);
                 
                 Particle particle = new Particle(this.particle);
-                particle.setPosX((int)(this.shipMiddleX + direction.getX()));
-                particle.setPosY((int)(this.shipMiddleY + direction.getY()));
+                particle.setPosX((int)(this.shipRealMiddleX + direction.getX()));
+                particle.setPosY((int)(this.shipRealMiddleY + direction.getY()));
                 particle.renewDuration();
                 MainLoop.particles.add(particle);
             }

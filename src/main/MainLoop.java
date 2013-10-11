@@ -4,7 +4,7 @@
  */
 package main;
 
-import window.KeyList;
+import support.Background;
 import window.Fenster;
 import units.Thruster;
 import units.Ship;
@@ -12,7 +12,9 @@ import java.awt.Canvas;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import support.Settings;
 import units.Particle;
+import utils.Logger;
 import utils.ObjectList;
 
 /**
@@ -25,10 +27,9 @@ public class MainLoop extends Canvas implements Runnable {
     Image dbImage;
     Graphics g;
     
-    Ship ship;
+    Background background;
     
-    int x;
-    int y;
+    Ship ship;
     
     int FPSlimiter;
     long FPS;
@@ -38,12 +39,12 @@ public class MainLoop extends Canvas implements Runnable {
     public static boolean focus;
     public static boolean resized;
     
-    public static boolean particlesEnabled = true;
-    
     public static ObjectList particles;
     
     public static int mausX;
     public static int mausY;
+    
+    Logger logger = new Logger(MainLoop.class);
     
     public MainLoop() {
         this.setIgnoreRepaint(true);
@@ -53,8 +54,7 @@ public class MainLoop extends Canvas implements Runnable {
         
         this.fenster = new Fenster(this);
         
-        this.x = 50;
-        this.y = 50;
+        background = new Background();
         
         this.FPSlimiter = 10;
         
@@ -70,24 +70,19 @@ public class MainLoop extends Canvas implements Runnable {
         mausX = 0;
         mausY = 0;
         
-        KeyList.FORWARD_Key_down = false;
-        KeyList.BACKWARD_Key_down = false;
-        KeyList.LEFT_Key_down = false;
-        KeyList.RIGHT_Key_down = false;
+        ship = new Ship("dummy.jpg",50,50,(this.getWidth()/2) - 25,(this.getHeight()/2) - 25);
         
-        ship = new Ship("dummy.jpg",50,50,50,50);
-        
-        Thruster forwardThruster = new Thruster(Thruster.STANDART,10,10,0.02f,ship.getMiddleX(),ship.getMiddleY(),-6,26,180.0);
+        Thruster forwardThruster = new Thruster(Thruster.STANDART,10,10,0.02f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),-6,26,180.0);
         forwardThruster.setParticleOutputRotationAngle(0);
         forwardThruster.setParticleOutputMultiplicator(40);
         
         ship.addForwardThruster(forwardThruster);
-        ship.addBackwardThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),-17,-30,-50.0));
-        ship.addBackwardThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),7,-30,50.0));
-        ship.addFrontLeftThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),-22,-13,-90.0));
-        ship.addFrontRightThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),12,-13,90.0));
-        ship.addBackLeftThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),-22,13,-90.0));
-        ship.addBackRightThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),12,13,90.0));
+        ship.addBackwardThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),-17,-30,-50.0));
+        ship.addBackwardThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),7,-30,50.0));
+        ship.addFrontLeftThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),-22,-13,-90.0));
+        ship.addFrontRightThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),12,-13,90.0));
+        ship.addBackLeftThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),-22,13,-90.0));
+        ship.addBackRightThruster(new Thruster(Thruster.STANDART,10,10,0.01f,ship.getMiddleX(),ship.getMiddleY(),ship.getRealMiddleX(),ship.getRealMiddleY(),12,13,90.0));
         
         this.run();
     }
@@ -100,34 +95,34 @@ public class MainLoop extends Canvas implements Runnable {
             }
             
             if (focus) {
-                if(KeyList.FORWARD_Key_down) {
+                if(Settings.FORWARD_Key_down) {
                     ship.throttleForward();
                 }
 
-                if (KeyList.LEFT_Key_down) {
+                if (Settings.LEFT_Key_down) {
                     ship.throttleLeft();
                 }
 
-                if (KeyList.BACKWARD_Key_down) {
+                if (Settings.BACKWARD_Key_down) {
                     ship.throttleBackward();
                 }
 
-                if (KeyList.RIGHT_Key_down) {
+                if (Settings.RIGHT_Key_down) {
                     ship.throttleRight();
                 }
             } else {
-             KeyList.FORWARD_Key_down = false;
-             KeyList.BACKWARD_Key_down = false;
-             KeyList.LEFT_Key_down = false;
-             KeyList.RIGHT_Key_down = false;
+                Settings.FORWARD_Key_down = false;
+                Settings.LEFT_Key_down = false;
+                Settings.BACKWARD_Key_down = false;
+                Settings.RIGHT_Key_down = false;
             }
             
-            ship.updateShip(mausX,mausY);
+            ship.updateShip(mausX,mausY,this.getWidth(),this.getHeight());
             
             try {
                 Thread.sleep(this.FPSlimiter);
             } catch (Exception e) {
-                System.out.println("Error: "+e);
+                logger.error("Error bei Thread.sleep mit FPSlimiter: "+e);
             }
             
             fpsCount();
@@ -136,11 +131,11 @@ public class MainLoop extends Canvas implements Runnable {
     }
     
     public void render() {
-        g.drawString("FPS: "+this.FPS, 30, 30);
-        
         Graphics2D g2d = (Graphics2D)g.create();
         
-        if (particlesEnabled) {
+        background.draw(g2d, this.getWidth(), this.getHeight());
+        
+        if (Settings.particlesEnabled) {
             for (int i = 0;i < particles.size();i++) {
                 Particle particle = (Particle)particles.getElementAt(i);
 
@@ -151,6 +146,8 @@ public class MainLoop extends Canvas implements Runnable {
         }
         
         ship.draw(g2d);
+        
+        g.drawString("FPS: "+this.FPS, 30, 30);
     }
     
     private void fpsCount() {
@@ -160,6 +157,14 @@ public class MainLoop extends Canvas implements Runnable {
             this.FPS = this.FPScurrent;
             this.FPScurrent = 0;
             this.FPSstart = System.currentTimeMillis();
+            
+            if (this.FPS < 100 && this.FPSlimiter > 0) {
+                this.FPSlimiter -= 1;
+                logger.run("FPSlimiter von "+(this.FPSlimiter+1)+"ms auf "+this.FPSlimiter+"ms geändert");
+            } else if (this.FPS > 100) {
+                this.FPSlimiter += 1;
+                logger.run("FPSlimiter von "+(this.FPSlimiter-1)+"ms auf "+this.FPSlimiter+"ms geändert");
+            }
         }
     }
     
@@ -167,6 +172,18 @@ public class MainLoop extends Canvas implements Runnable {
         if (dbImage == null) {
             reCreateBuffer();
         }
+        
+        //Berechnen des aktuellen Abstandes zwischen Schiff und Fensterrand
+        float distanceX_Old = this.ship.getMiddleX();
+        float distanceY_Old = this.ship.getMiddleY();
+        
+        //Mittelkoordinaten des Schiffs werden auf die Hälfte der Fensterbreite bzw Fensterhöhe aktualisiert
+        this.ship.setMiddleX(this.getWidth() / 2);
+        this.ship.setMiddleY(this.getHeight() / 2);
+        
+        //Die Hintergrund X werden um den Abstand, um den das Schiff versetzt wurde (neuer Abstand - alter Abstand => veränderte Distanz) ebenfalls verschoben
+        Background.X = Background.X + (this.ship.getMiddleX() - distanceX_Old);
+        Background.Y = Background.Y + (this.ship.getMiddleY() - distanceY_Old);
         
         this.paint(g);
         render();

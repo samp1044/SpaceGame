@@ -7,6 +7,7 @@ package units;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import support.Background;
 
 /**
  *
@@ -86,7 +87,7 @@ public class Particle {
             this.actual = 0;
         }
         
-        g2d.drawImage(this.img[this.actual], this.posX, this.posY, null);
+        g2d.drawImage(this.img[this.actual], (int)Background.X + this.posX, (int)Background.Y + this.posY, null);
         
         if((System.currentTimeMillis() - this.lifeTimeStart) <= this.duration) {
             return false;

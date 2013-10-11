@@ -6,6 +6,8 @@ package window;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import main.MainLoop;
+import support.Settings;
 
 /**
  *
@@ -20,44 +22,39 @@ public class OwnKeyListener implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch(e.getKeyCode()) {
-            case KeyList.FORWARD:
-                KeyList.FORWARD_Key_down = true;
-                break;
-                
-            case KeyList.LEFT:
-                KeyList.LEFT_Key_down = true;
-                break;
-                
-            case KeyList.BACKWARD:
-                KeyList.BACKWARD_Key_down = true;
-                break;
-                
-            case KeyList.RIGHT:
-                KeyList.RIGHT_Key_down = true;
-                break;
+        if (e.getKeyCode() == Settings.KeyFORWARD) {
+            Settings.FORWARD_Key_down = true;
         }
         
+        if (e.getKeyCode() == Settings.KeyBACKWARD) {
+            Settings.BACKWARD_Key_down = true;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyLEFT) {
+            Settings.LEFT_Key_down = true;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyRIGHT) {
+            Settings.RIGHT_Key_down = true;
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        switch(e.getKeyCode()) {
-            case KeyList.FORWARD:
-                KeyList.FORWARD_Key_down = false;
-                break;
-                
-            case KeyList.LEFT:
-                KeyList.LEFT_Key_down = false;
-                break;
-                
-            case KeyList.BACKWARD:
-                KeyList.BACKWARD_Key_down = false;
-                break;
-                
-            case KeyList.RIGHT:
-                KeyList.RIGHT_Key_down = false;
-                break;
+        if (e.getKeyCode() == Settings.KeyFORWARD) {
+            Settings.FORWARD_Key_down = false;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyBACKWARD) {
+            Settings.BACKWARD_Key_down = false;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyLEFT) {
+            Settings.LEFT_Key_down = false;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyRIGHT) {
+            Settings.RIGHT_Key_down = false;
         }
     }
     

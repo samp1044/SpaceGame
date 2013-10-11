@@ -5,6 +5,8 @@
 package window;
 
 import java.awt.Canvas;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 
@@ -15,7 +17,6 @@ import javax.swing.JFrame;
 public class Fenster extends JFrame {
     private int height;
     private int width;
-    //change has happened
     
     public Fenster(Canvas canvas) {
         setTitle("Space Game");
