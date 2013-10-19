@@ -15,8 +15,6 @@ import javax.swing.JFrame;
  * @author Sami
  */
 public class Fenster extends JFrame {
-    private int height;
-    private int width;
     
     public Fenster(Canvas canvas) {
         setTitle("Space Game");
@@ -26,6 +24,7 @@ public class Fenster extends JFrame {
         
         canvas.addKeyListener(keyListener);
         canvas.addMouseMotionListener(mouseMotionListener);
+        canvas.addMouseListener(new OwnMouseListener());
         
         addComponentListener(new OwnComponentListener());
         addKeyListener(keyListener);

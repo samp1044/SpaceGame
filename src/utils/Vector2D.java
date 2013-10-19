@@ -170,11 +170,29 @@ public class Vector2D {
     }
     
     /**
+     * <b>Funktioniert nicht!</b>
+     */
+    public double getFullAngle(Vector2D v) {
+        double angle = 0.0;
+        
+        angle = Math.acos(getScalarProduct(v) / (getLength() * v.getLength()));
+        angle = angle * 180 / Math.PI;
+        
+        if(this.isLeftOf(v)) {
+            angle = 360 - angle;
+        }
+        
+        return angle;
+    }
+    
+    /**
      * Liefert den um die übergebene Gradzahl gedrehten Vektor zurück. Gedreht wird gegen den
      * Uhrzeiger, um mit dem Uhrzeiger zu drehen einen negativen double Wert übergeben.
      */
     public Vector2D getRotatedVector(double degree) {
         Vector2D v = new Vector2D();
+        
+        degree = degree * (Math.PI/180);
         
         v.x = (float) (this.x * Math.cos(degree) - this.y * Math.sin(degree));
         v.y = (float) (this.x * Math.sin(degree) + this.y * Math.cos(degree));
@@ -190,7 +208,8 @@ public class Vector2D {
      * Möglicher Genauigkeitsverlust durch Konvertierung in int
      */
     public boolean isLeftOf(Vector2D v) {
-        Point a = new Point(1,1);
+        //Hat Probleme bei 90° Winkeln
+        /*Point a = new Point(1,1);
         Point b = new Point();
         Point c = new Point();
         
@@ -200,9 +219,9 @@ public class Vector2D {
         c.x = (int)(a.x + v.x);
         c.y = (int)(a.y + v.x);
         
-        return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;
+        return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;*/
         
-        /* Alternativ version die die Winkel vergleicht:
+        /* Alternativ version die die Winkel vergleicht:*/
          
         Vector2D instanceV = new Vector2D(this.x,this.y);
         double angle1 = instanceV.getAngle(v);
@@ -211,13 +230,11 @@ public class Vector2D {
         
         double angle2 = instanceV.getAngle(v);
         
-        //System.out.println("direction: "+this+",maus: "+v+", angle1: "+angle1+", angle2: "+angle2);
-        
         if (angle2 <= angle1) {
             return true;
         } else {
             return false;
-        }*/
+        }
     }
     
     /**

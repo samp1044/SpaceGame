@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import support.Background;
+import utils.Logger;
 
 /**
  *
@@ -27,6 +28,8 @@ public class Particle {
     
     private long duration;
     private long lifeTimeStart;
+    
+    Logger logger = new Logger(Particle.class);
     
     /**
      * 
@@ -106,5 +109,13 @@ public class Particle {
     
     public void setPosY(int posY) {
         this.posY = posY;
+    }
+    
+    public int getWidth() {
+        return this.width;
+    }
+    
+    public int getHeight() {
+        return this.height;
     }
 }

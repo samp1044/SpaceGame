@@ -4,46 +4,57 @@
  */
 package units;
 
-import support.Background;
-import utils.Vector2D;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Toolkit;
-import utils.Logger;
+import support.FixedCollisionBox;
+import support.Resources;
+import utils.Vector2D;
 
 /**
  *
  * @author Sami
  */
 public class Ship {
-    private Image img;
-    private float rotationDegree;
-    private int width;
-    private int height;
+    public static final int DUMMY = 1;
     
-    private float realMiddleX;
-    private float realMiddleY;
-    private float middleX;
-    private float middleY;
-    private float posX;
-    private float posY;
+    protected Image[] img;
+    protected int actual;
+    protected float rotationDegree;
+    protected int width;
+    protected int height;
     
-    private Vector2D direction;
-    private Vector2D force;
+    protected float middleX;
+    protected float middleY;
+    protected float posX;
+    protected float posY;
     
-    private Thruster[] thrusterForward;
-    private Thruster[] thrusterBackward;
-    private Thruster[] thrusterFrontLeft;
-    private Thruster[] thrusterBackLeft;
-    private Thruster[] thrusterFrontRight;
-    private Thruster[] thrusterBackRight;
+    protected Vector2D direction;
+    protected Vector2D force;
     
-    Logger logger = new Logger(Ship.class);
+    protected Thruster[] thrusterForward;
+    protected Thruster[] thrusterBackward;
+    protected Thruster[] thrusterFrontLeft;
+    protected Thruster[] thrusterBackLeft;
+    protected Thruster[] thrusterFrontRight;
+    protected Thruster[] thrusterBackRight;
     
-    public Ship(String file,int width,int height,int x,int y) {
-        this.img = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/ships/"+file));
-        this.img = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    float rotationLeftThrust;
+    float rotationRightThrust ;
+    
+    protected Weapon[] weapons;
+    
+    protected FixedCollisionBox boxCollider;
+    protected float health;
+    protected float armor;
+    
+    public Ship(int typ,int width,int height,int x,int y,float health,Resources resources) {
+        switch(typ) {
+            case DUMMY:
+                img = resources.getScaledImageField(Resources.SHIP_DUMMY, width, height);
+                break;
+        }
         
+        this.actual = 0;
         this.rotationDegree = 0.0f;
         
         this.width = width;
@@ -55,9 +66,6 @@ public class Ship {
         this.middleX = this.posX + (width / 2.0F);
         this.middleY = this.posY + (height / 2.0F);
         
-        this.realMiddleX = this.middleX;
-        this.realMiddleY = this.middleY;
-        
         this.direction = new Vector2D(0,-1);
         this.force = new Vector2D(0,0);
         
@@ -68,42 +76,11 @@ public class Ship {
         this.thrusterBackLeft = new Thruster[0];
         this.thrusterFrontRight = new Thruster[0];
         this.thrusterBackRight = new Thruster[0];
-    }
-    
-    public void updateShip(int mausX,int mausY,int canvasWidth,int canvasHeight) {
-        this.realMiddleX = (-Background.X) + (canvasWidth / 2); //Die Realen X Koordinaten (mit dem Background abgestimmt und POSITIV, werden aktualisiert:
-        this.realMiddleY = (-Background.Y) + (canvasHeight / 2);//Background koordinate + hälfte der Fensterbreite bzw Fensterhöhe
         
-        Background.move(this.force); //Statt das schiff mit force zu bewegen wird der Background mit Force bewegt
+        this.weapons = new Weapon[0];
         
-        this.posX = this.middleX - (this.width / 2.0F);
-        this.posY = this.middleY - (this.height / 2.0F);
-        
-        for (int i = 0;i < this.thrusterForward.length; i++) {
-            this.thrusterForward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        for (int i = 0;i < this.thrusterBackward.length; i++) {
-            this.thrusterBackward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        for (int i = 0;i < this.thrusterFrontLeft.length; i++) {
-            this.thrusterFrontLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        for (int i = 0;i < this.thrusterBackLeft.length; i++) {
-            this.thrusterBackLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        for (int i = 0;i < this.thrusterFrontRight.length; i++) {
-            this.thrusterFrontRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        for (int i = 0;i < this.thrusterBackRight.length; i++) {
-            this.thrusterBackRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
-        }
-        
-        manageRotation(mausX, mausY);
+        this.health = health;
+        this.boxCollider = new FixedCollisionBox(this.middleX,this.middleY,this.width,this.height);
     }
     
     public void throttleForward() {
@@ -164,34 +141,7 @@ public class Ship {
         this.force = this.force.addVector(vector);
     }
     
-    private void manageRotation(int mausX,int mausY) {
-        boolean leftOf = this.direction.isLeftOf(new Vector2D(mausX-this.middleX,mausY-this.middleY));
-        Vector2D mouse = new Vector2D(mausX-this.middleX,mausY-this.middleY);
-        
-        //(float) zum runden (statt 179.9999...° => 180.0°)
-        //Funkioniert nicht (sollte mit maximalerdrehgeschwindigkeit zum mauszeiger drehen, eventuell später nochmal überarbeiten bzw neuschreiben)
-        /*if((float)(this.direction.getAngle(mouse)) > 1) {
-            if (leftOf) {
-                if((float)(this.direction.getAngle(mouse)) >= this.rotationLeftThrust) {
-                    this.direction = this.direction.getRotatedVector(this.rotationLeftThrust);
-                } else {
-                    this.direction = this.direction.getRotatedVector(this.direction.getAngle(mouse));
-                }
-            } else {
-                if((float)(this.direction.getAngle(mouse)) >= this.rotationRightThrust) {
-                    this.direction = this.direction.getRotatedVector(this.rotationRightThrust * -1.0);
-                } else {
-                    this.direction = this.direction.getRotatedVector(this.direction.getAngle(mouse) * -1.0);
-                }
-            }
-        } else {*/
-            this.direction = mouse.getUnitVector();
-        //}
-        
-        calculateRotationDegree();
-    }
-    
-    private void calculateRotationDegree() {
+    protected void calculateRotationDegree() {
         boolean isLeft = false;
         float oldRotationDegree = this.rotationDegree;
         Vector2D fixedVector = new Vector2D(0,-1);
@@ -227,10 +177,21 @@ public class Ship {
     
     public void draw(Graphics2D g2d) {
         g2d.rotate(Math.toRadians(this.rotationDegree), (int)this.posX+this.width/2, (int)this.posY+this.height/2);
-        g2d.drawImage(this.img, (int)this.posX, (int)this.posY, null);
+        
+        if ((this.actual + 1) < img.length) {
+            this.actual += 1;
+        } else {
+            this.actual = 0;
+        }
+        
+        for (int i = 0;i < this.weapons.length;i++) {
+            this.weapons[i].draw(g2d, direction);
+        }
+        
+        g2d.drawImage(this.img[this.actual], (int)this.posX, (int)this.posY, null);
         
         for (int i = 0;i < this.thrusterForward.length;i++) {
-            this.thrusterForward[i].draw(g2d,this.direction);
+            this.thrusterForward[i].draw(g2d,this.rotationDegree);
         }
         
         for (int i = 0;i < this.thrusterBackward.length;i++) {
@@ -322,7 +283,35 @@ public class Ship {
         this.thrusterBackRight = dummy;
     }
     
-    public Image getImg() {
+    public void addWeapon(Weapon weapon) {
+        Weapon[] dummy = new Weapon[this.weapons.length + 1];
+        
+        for (int i = 0;i < this.weapons.length;i++) {
+            dummy[i] = this.weapons[i];
+        }
+        
+        dummy[this.weapons.length] = weapon;
+        this.weapons = dummy;
+    }
+    
+    public void setWeapons(Weapon[] weapons) {
+        this.weapons = weapons;
+    }
+    
+    public Weapon[] getWeapons() {
+        return this.weapons;
+    }
+    
+    public void setRotationThrust(float rotationThrust) {
+        this.rotationLeftThrust = rotationThrust;
+        this.rotationRightThrust = rotationThrust;
+    }
+    
+    public void removeWeapons() {
+        this.weapons = new Weapon[0];
+    }
+    
+    public Image[] getImg() {
         return this.img;
     }
     
@@ -350,13 +339,5 @@ public class Ship {
     public void setMiddleY(float middleY) {
         this.middleY = middleY;
         this.posY = middleY - (this.height / 2);
-    }
-    
-    public float getRealMiddleX() {
-        return this.realMiddleX;
-    }
-    
-    public float getRealMiddleY() {
-        return this.realMiddleY;
     }
 }

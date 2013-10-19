@@ -6,7 +6,6 @@ package support;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Toolkit;
 import utils.Logger;
 import utils.Vector2D;
 
@@ -27,26 +26,35 @@ public class Background {
     private int sectorWidth;
     private int sectorHeight;
     
-    Logger logger = new Logger(Background.class);
+    //Static weil es sonst in den static methoden nicht aufrufbar ist
+    static Logger logger = new Logger(Background.class);
     
-    public Background() {
+    public Background(Resources resources) {
+        logger.debug("Initialisiere Background");
+        
         this.sectorHeight = 1080;
         logger.debug("sectorHeight set to "+this.sectorHeight);
         this.sectorWidth = 1920;
         logger.debug("sectorWidth set to "+this.sectorWidth);
         
-        this.stars = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/backgrounds/sector00.png"));
+        this.stars = resources.getImageField(Resources.BACKGROUND_STARS)[0];
+        logger.debug("stars bild geladen: stars.png");
         
         this.sectors = new Image[1][1];
+        logger.debug("sector array erstellt (1/1)");
         
+        int cnt = 0;
+        Image[] sectorImgs = resources.getScaledImageField(Resources.BACKGROUND_SECTORS, this.sectorWidth, this.sectorHeight);
         for (int i = 0;i < sectors.length;i++) {
             for (int j = 0;j < sectors[i].length;j++) {
-                this.sectors[i][j] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/backgrounds/sector"+i+j+".png"));
-                this.sectors[i][j] = this.sectors[i][j].getScaledInstance(this.sectorWidth, this.sectorHeight, Image.SCALE_SMOOTH);
+                sectors[i][j] = sectorImgs[cnt];
+                if (cnt < sectorImgs.length) {
+                    cnt++;
+                }
             }
         }
         
-        logger.info("Background initialised");
+        logger.info("Background initialisiert");
     }
     
     public static void move(Vector2D direction) {
@@ -64,10 +72,38 @@ public class Background {
             } else {
                 Y = 0;
             }
+            
+            direction = direction.divideByNumber(2);
+            
+            if (BackgroundX + direction.getX() <= 0) {
+                BackgroundX = BackgroundX + direction.getX();
+            } else {
+                BackgroundX = 0;
+            }
+            
+            if (BackgroundY + direction.getY() <= 0) {
+                BackgroundY = BackgroundY + direction.getY();
+            } else {
+                BackgroundY = 0;
+            }
         }
     }
     
+    public static void positionChanged(float changeX, float changeY) {
+        Background.X = Background.X + changeX;
+        Background.Y = Background.Y + changeY;
+        
+        //ungestestet
+        Background.BackgroundX = Background.BackgroundX + changeX;
+        Background.BackgroundY = Background.BackgroundY + changeY;
+    }
+    
     public void draw(Graphics2D g2d,int canvasWidth,int canvasHeight) {
+        
+        drawStars(g2d, canvasWidth, canvasHeight);
+    }
+    
+    private void drawStars(Graphics2D g2d,int canvasWidth,int canvasHeight) {
         int pictureWidth = this.sectorWidth;
         int pictureHeight = this.sectorHeight;
         

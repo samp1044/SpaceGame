@@ -6,7 +6,6 @@ package window;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import main.MainLoop;
 import support.Settings;
 
 /**
@@ -22,6 +21,10 @@ public class OwnKeyListener implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == Settings.KeySHOOT) {
+            Settings.SHOOT_Key_down = true;
+        }
+        
         if (e.getKeyCode() == Settings.KeyFORWARD) {
             Settings.FORWARD_Key_down = true;
         }
@@ -41,6 +44,10 @@ public class OwnKeyListener implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == Settings.KeySHOOT) {
+            Settings.SHOOT_Key_down = false;
+        }
+        
         if (e.getKeyCode() == Settings.KeyFORWARD) {
             Settings.FORWARD_Key_down = false;
         }
@@ -55,6 +62,14 @@ public class OwnKeyListener implements KeyListener {
         
         if (e.getKeyCode() == Settings.KeyRIGHT) {
             Settings.RIGHT_Key_down = false;
+        }
+        
+        if (e.getKeyCode() == Settings.KeyDEBUG_INFO) {
+            if (Settings.showDebug) {
+                Settings.showDebug = false;
+            } else {
+                Settings.showDebug = true;
+            }
         }
     }
     
