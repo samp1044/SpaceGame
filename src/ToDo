@@ -1,0 +1,56 @@
+- Turret genauigkeit auf Maus verbessern    done
+- FPS Manager überprüfen und säubern    done
+- ShipBuilder überarbeiten  done
+- Waffen blockieren wenn auf UI geklickt    partly
+- Bullet Explosion beim Auftreffen ohne Schilde     done
+- Inventar  done
+    - popup done
+    - dropverwaltung    done
+    - frachtraum im schiff  done
+    - mehr slots im schiff für spezialgegenstände und powerups, eventuell interface useable/assignable/equipable etc lösung done
+    - austauschbare schiffskomponenten, triebwerke, waffen, schilde, reaktor, batterie usw  done
+- Map Navigation
+    - Radar
+    - Levelbegrenzung
+    - HyperDrive?
+    - popup fenster
+    - wegpunkte
+    - gegner/verbündete markierungen
+- UI
+    - pfeile zu gegnern, verbündeten, wegpunkten und drops
+    - pausemenü
+    - hauptmenü
+- AI:
+    - AI Verhaltensweisen implementieren partly
+        - Mehr Fraktionen
+        - Gruppenbildung mit Player
+        - frachtschiffe die Handeln
+        - selbständiges Pathfinding
+    - SlotSystem für AI übertragen  halfDone
+    - Turrets für AI implementieren done
+    - AI Lebensbalken   done
+    - AI Namen  done
+    - AI drops  done
+        - AI dropt keine random items sondern was sie auch tatsächlich hat
+    - AI Spawn
+        - Austattungsentscheidung eventuell zufällig mit schwierigkeitsgrad
+        - nach Gebieten und fraktionen
+- TDOT
+    - Sounds?
+    - Mehr Assets!
+    - Path system für AI
+
+
+- Weapon Klasse überarbeiten    partly
+- TurretSystem vorallem         zielen done
+- Turret auch auf Quadratisch umstellen     done
+- Inventar Tooltip für Slot auf statisch    done
+- Masse bei Thrustern einbauen  done
+- Thruster lighting neuschreiben    partly
+- Thruster ein eigenes Bild geben   done
+- Thruster und Weapon mit Höhenwerten (über und unterm schiff) versehen     done
+
+- Strahlenwaffen einfügen
+- Partikelspur neuschreiben und verschönern
+- Itemdrop einsammeln auf tastendruck mit animation umstellen
+- Zoom Faktor

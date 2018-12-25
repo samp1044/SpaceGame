@@ -11,27 +11,23 @@ import java.awt.Point;
  * @author Sami
  */
 public class Vector2D {
-    private float x;
-    private float y;
+    private double x;
+    private double y;
     
-    public Vector2D(float x,float y) {
+    public Vector2D(double x,double y) {
         this.x = x;
         this.y = y;
     }
     
-    public Vector2D(int x,int y) {
-        this((float)x,(float)y);
-    }
-    
-    public Vector2D(double x,double y) {
-        this((float)x,(float)y);
-    }
-    
     public Vector2D(Point p) {
-        this((float)p.x,(float)p.y);
+        this(p.x,p.y);
     }
     
     public Vector2D(float fromX,float fromY,float toX,float toY) {
+        this(toX - fromX,toY - fromY);
+    }
+    
+    public Vector2D(double fromX,double fromY,double toX,double toY) {
         this(toX - fromX,toY - fromY);
     }
     
@@ -50,8 +46,14 @@ public class Vector2D {
         Vector2D v = new Vector2D();
         double length = Math.sqrt((this.x * this.x) + (this.y * this.y));
         
-        v.setX((float)(this.x/length));
-        v.setY((float)(this.y/length));
+        if (length == 0) {
+            int a = 0;
+        }
+        
+        v.setX((this.x/length));
+        v.setY((this.y/length));
+        
+        v.checkForInvalidNumber();
         
         return v;
     }
@@ -125,8 +127,8 @@ public class Vector2D {
     public Vector2D multiplyWithNumber(double number) {
         Vector2D vector = new Vector2D();
         
-        vector.setX((float)(this.x * number));
-        vector.setY((float)(this.y * number));
+        vector.setX((this.x * number));
+        vector.setY((this.y * number));
         
         return vector;
     }
@@ -137,8 +139,10 @@ public class Vector2D {
     public Vector2D divideByNumber(double number) {
         Vector2D vector = new Vector2D();
         
-        vector.setX((float)(this.x / number));
-        vector.setY((float)(this.y / number));
+        vector.setX((this.x / number));
+        vector.setY((this.y / number));
+        
+        vector.checkForInvalidNumber();
         
         return vector;
     }
@@ -192,10 +196,12 @@ public class Vector2D {
     public Vector2D getRotatedVector(double degree) {
         Vector2D v = new Vector2D();
         
-        degree = degree * (Math.PI/180);
+        degree = Math.toRadians(degree);
         
-        v.x = (float) (this.x * Math.cos(degree) - this.y * Math.sin(degree));
-        v.y = (float) (this.x * Math.sin(degree) + this.y * Math.cos(degree));
+        v.x =  (this.x * Math.cos(degree) - this.y * Math.sin(degree));
+        v.y =  (this.x * Math.sin(degree) + this.y * Math.cos(degree));
+        
+        v.checkForInvalidNumber();
         
         return v;
     }
@@ -274,19 +280,29 @@ public class Vector2D {
         return isEqual;
     }
     
-    public float getX() {
+    private void checkForInvalidNumber() {
+        if (Double.isNaN(this.x)) {
+            this.x = 0;
+        }
+        
+        if (Double.isNaN(this.y)) {
+            this.y = 0;
+        }
+    }
+    
+    public double getX() {
         return x;
     }
 
-    public void setX(float x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(float y) {
+    public void setY(double y) {
         this.y = y;
     }
     

@@ -6,6 +6,8 @@ package support;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import main.MainLoop;
 import utils.Logger;
 import utils.Vector2D;
 
@@ -14,14 +16,14 @@ import utils.Vector2D;
  * @author Sami
  */
 public class Background {
-    public static float X;
-    public static float Y;
+    public static double X;
+    public static double Y;
     
-    public static float BackgroundX;
-    public static float BackgroundY;
+    public static double BackgroundX;
+    public static double BackgroundY;
     
-    private Image[][] sectors;
-    private Image stars;
+    private BufferedImage[][] sectors;
+    private BufferedImage stars;
     
     private int sectorWidth;
     private int sectorHeight;
@@ -37,14 +39,14 @@ public class Background {
         this.sectorWidth = 1920;
         logger.debug("sectorWidth set to "+this.sectorWidth);
         
-        this.stars = resources.getImageField(Resources.BACKGROUND_STARS)[0];
+        this.stars = resources.getScaledBufferedImageField(Resources.BACKGROUND_STARS,1920,1080,Resources.SCALE_SMOOTH)[0];
         logger.debug("stars bild geladen: stars.png");
         
-        this.sectors = new Image[1][1];
+        this.sectors = new BufferedImage[1][1];
         logger.debug("sector array erstellt (1/1)");
         
         int cnt = 0;
-        Image[] sectorImgs = resources.getScaledImageField(Resources.BACKGROUND_SECTORS, this.sectorWidth, this.sectorHeight);
+        BufferedImage[] sectorImgs = resources.getScaledBufferedImageField(Resources.BACKGROUND_SECTORS, this.sectorWidth, this.sectorHeight,Resources.SCALE_SMOOTH);
         for (int i = 0;i < sectors.length;i++) {
             for (int j = 0;j < sectors[i].length;j++) {
                 sectors[i][j] = sectorImgs[cnt];
@@ -65,15 +67,18 @@ public class Background {
                 X = X + direction.getX();
             } else {
                 X = 0;
+                MainLoop.playerShip.stop();
             }
             
             if (Y + direction.getY() <= 0) {
                 Y = Y + direction.getY();
             } else {
                 Y = 0;
+                MainLoop.playerShip.stop();
             }
             
-            direction = direction.divideByNumber(2);
+            /*not implemented
+             * direction = direction.divideByNumber(2);
             
             if (BackgroundX + direction.getX() <= 0) {
                 BackgroundX = BackgroundX + direction.getX();
@@ -85,7 +90,7 @@ public class Background {
                 BackgroundY = BackgroundY + direction.getY();
             } else {
                 BackgroundY = 0;
-            }
+            }*/
         }
     }
     
@@ -93,13 +98,12 @@ public class Background {
         Background.X = Background.X + changeX;
         Background.Y = Background.Y + changeY;
         
-        //ungestestet
+        //ungetestet
         Background.BackgroundX = Background.BackgroundX + changeX;
         Background.BackgroundY = Background.BackgroundY + changeY;
     }
     
     public void draw(Graphics2D g2d,int canvasWidth,int canvasHeight) {
-        
         drawStars(g2d, canvasWidth, canvasHeight);
     }
     

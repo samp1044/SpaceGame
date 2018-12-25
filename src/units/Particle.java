@@ -22,6 +22,8 @@ public class Particle {
     private int height;
     
     private int actual;
+    private long lastAnimationImage_Time;
+    private long animationDelay;
             
     private int posX;
     private int posY;
@@ -61,6 +63,9 @@ public class Particle {
         this.duration = duration;
         this.lifeTimeStart = System.currentTimeMillis();
         
+        this.animationDelay = 50;
+        this.lastAnimationImage_Time = 0;
+        
         for (int i = 0;i < files.length;i++) {
             img[i] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/particles/"+files[i]));
             this.img[i] = img[i].getScaledInstance(this.width, this.height, Image.SCALE_SMOOTH);
@@ -84,10 +89,12 @@ public class Particle {
     }
     
     public boolean draw(Graphics2D g2d) {
-        if((this.actual + 1) < this.img.length) {
+        if ((this.actual + 1) < img.length && (System.currentTimeMillis() - this.lastAnimationImage_Time) >= this.animationDelay) {
             this.actual += 1;
-        } else {
+            this.lastAnimationImage_Time = System.currentTimeMillis();
+        } else if ((System.currentTimeMillis() - this.lastAnimationImage_Time) >= this.animationDelay) {
             this.actual = 0;
+            this.lastAnimationImage_Time = System.currentTimeMillis();
         }
         
         g2d.drawImage(this.img[this.actual], (int)Background.X + this.posX, (int)Background.Y + this.posY, null);

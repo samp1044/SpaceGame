@@ -4,9 +4,13 @@
  */
 package window;
 
+import Listener.OwnComponentListener;
+import Listener.OwnMouseMotionListener;
+import Listener.OwnKeyListener;
+import Listener.OwnMouseWheelListener;
+import Listener.WindowClosingListener;
+import Listener.OwnMouseListener;
 import java.awt.Canvas;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 
@@ -26,11 +30,15 @@ public class Fenster extends JFrame {
         canvas.addMouseMotionListener(mouseMotionListener);
         canvas.addMouseListener(new OwnMouseListener());
         
+        addMouseWheelListener(new OwnMouseWheelListener());
         addComponentListener(new OwnComponentListener());
         addKeyListener(keyListener);
+        addMouseMotionListener(mouseMotionListener);
         add(canvas);
         pack();
         addWindowListener((WindowListener) new WindowClosingListener());
+        
+        //setResizable(false);
         setIgnoreRepaint(true);
         setVisible(true);
     }

@@ -22,14 +22,14 @@ public class Date {
         this.jahr = jahr;
         
         GregorianCalendar cal = new GregorianCalendar();
-        cal.set(this.jahr, this.monat, this.tag);
+        cal.set(this.jahr, this.monat - 1, this.tag);
         this.dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
     }
     
     public Date() {
         GregorianCalendar cal = new GregorianCalendar();
         this.jahr = cal.get(GregorianCalendar.YEAR);
-        this.monat = cal.get(GregorianCalendar.MONTH);
+        this.monat = cal.get(GregorianCalendar.MONTH) + 1;
         this.tag = cal.get(GregorianCalendar.DAY_OF_MONTH);
         this.dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
         
@@ -73,5 +73,21 @@ public class Date {
 
     public void setJahr(int jahr) {
         this.jahr = jahr;
+    }
+    
+    public String getDateString() {
+        String tagS = ""+this.tag;
+        String monatS = ""+this.monat;
+        String jahrS = ""+this.jahr;
+        
+        if (this.tag < 10) {
+            tagS = "0"+this.tag;
+        }
+        
+        if (this.monat < 10) {
+            monatS = "0"+this.monat;
+        }
+        
+        return ""+tagS+""+monatS+""+jahrS;
     }
 }

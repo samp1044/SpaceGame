@@ -5,7 +5,6 @@
 package support;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import utils.Vector2D;
 
 /**
@@ -14,161 +13,210 @@ import utils.Vector2D;
  */
 public class FixedCollisionBox extends CollisionBox {
     double rotation;
-    public Point[][] coord;
-    
-    public FixedCollisionBox(float middleX,float middleY,int width,int height) {
-        super(middleX,middleY,width,height);
-        this.coord = new Point[0][0];
-        setRotation(0);
-    }
     
     public FixedCollisionBox(double middleX,double middleY,int width,int height) {
-        super((float)middleX,(float)middleY,width,height);
-        this.coord = new Point[0][0];
+        super(middleX,middleY,width,height);
         setRotation(0);
     }
     
     public FixedCollisionBox(CollisionBox b) {
         super(b);
-        this.coord = new Point[0][0];
         setRotation(0);
     }
     
     public FixedCollisionBox(FixedCollisionBox b) {
         super(b);
-        this.coord = new Point[0][0];
         setRotation(b.rotation);
     }
     
     @Override
-    public void updateBox(float middleX, float middleY) {
+    public void updateBox(double middleX, double middleY) {
         super.updateBox(middleX, middleY);
         setRotation(this.rotation);
     }
     
     @Override
-    public boolean isOverlapping(CollisionBox b) {
-        boolean overlaps = false;
-        
-        OuterLoop:
-        for (int i = 0;i < this.coord.length;i++) {
-            for (int j = 0;j < this.coord[i].length;j++) {
-                if (b.isInside((int)this.coord[i][j].getX(), (int)this.coord[i][j].getY())) {
-                    overlaps = true;
-                    break OuterLoop;
-                }
-            }
-        }
-        
-        return overlaps;
-    }
-    
-    @Override
     public boolean isOverlapping(FixedCollisionBox b) {
-        boolean overlaps = false;
+        boolean collision = true;
         
-        OuterLoop:
-        for (int i = 0;i < this.coord.length;i++) {
-            for (int j = 0;j < this.coord[i].length;j++) {
-                if (b.isInside((int)this.coord[i][j].getX(), (int)this.coord[i][j].getY())) {
-                    overlaps = true;
-                    break OuterLoop;
-                }
-            }
+        if (!checkCollision(this,b)) {
+            return false;
         }
         
-        return overlaps;
+        if (!checkCollision(b,this)) {
+            return false;
+        }
+        
+        return collision;
     }
     
-    public boolean isInside(int tX,int tY) {
-        boolean inside = false;
+    private boolean checkCollision(FixedCollisionBox base, FixedCollisionBox foreign) {
+        boolean collision = true;
+        //ul..upper left, ur..upper right, dl..down left, dr..down right corner
+        double ulX = 0;
+        double ulY = 0;
         
-        OuterLoop:
-        for (int i = 0;i < this.coord.length;i++) {
-            for (int j = 0;j < this.coord[i].length;j++) {
-                if (tX == (int)this.coord[i][j].getX() && tY == (int)this.coord[i][j].getY()) {
-                    inside = true;
-                    break OuterLoop;
-                }
-            }
+        double urX = 0;
+        double urY = 0;
+        
+        double dlX = 0;
+        double dlY = 0;
+        
+        double drX = 0;
+        double drY = 0;
+        
+        //1 Dimensional projezierte Eckpunkte:
+        //leftCorner_Own, rightCorner_Own
+        double lc_O = 0;
+        double rc_O = 0;
+        
+        //leftCorner_Foreign, rightCorner_Foreign
+        double lc_F = 0;
+        double rc_F = 0;
+        
+        if (base.rotation != 0) {
+            Vector2D ul = new Vector2D(base.middleX,base.middleY,foreign.getUpperLeftX(),foreign.getUpperLeftY()).getRotatedVector(-base.rotation);
+            Vector2D ur = new Vector2D(base.middleX,base.middleY,foreign.getUpperRightX(),foreign.getUpperRightY()).getRotatedVector(-base.rotation);
+            Vector2D dl = new Vector2D(base.middleX,base.middleY,foreign.getDownLeftX(),foreign.getDownLeftY()).getRotatedVector(-base.rotation);
+            Vector2D dr = new Vector2D(base.middleX,base.middleY,foreign.getDownRightX(),foreign.getDownRightY()).getRotatedVector(-base.rotation);
+            
+            ulX = base.middleX + ul.getX();
+            ulY = base.middleY + ul.getY();
+            
+            urX = base.middleX + ur.getX();
+            urY = base.middleY + ur.getY();
+            
+            dlX = base.middleX + dl.getX();
+            dlY = base.middleY + dl.getY();
+            
+            drX = base.middleX + dr.getX();
+            drY = base.middleY + dr.getY();
+        } else {
+            ulX = foreign.getUpperLeftX();
+            ulY = foreign.getUpperLeftY();
+            
+            urX = foreign.getUpperRightX();
+            urY = foreign.getUpperRightY();
+            
+            dlX = foreign.getDownLeftX();
+            dlY = foreign.getDownLeftY();
+            
+            drX = foreign.getDownRightX();
+            drY = foreign.getDownRightY();
         }
         
-        return inside;
+        //Rechts/Links projektion (y - vergleich)
+        
+        lc_O = base.middleY - (base.height / 2);
+        rc_O = base.middleY + (base.height / 2);
+        
+        //Oberste Y koordinate für lc_F
+        lc_F = ulY;
+        
+        if (urY < lc_F) {
+            lc_F = urY;
+        }
+        
+        if (dlY < lc_F) {
+            lc_F = dlY;
+        }
+        
+        if (drY < lc_F) {
+            lc_F = drY;
+        }
+        
+        //Unterste Y koordinate für rc_F
+        rc_F = ulY;
+        
+        if (urY > rc_F) {
+            rc_F = urY;
+        }
+        
+        if (dlY > rc_F) {
+            rc_F = dlY;
+        }
+        
+        if (drY > rc_F) {
+            rc_F = drY;
+        }
+        
+        //A: lc_O, B: rc_O, A1: lc_F, B1: rc_F
+        if (!((lc_F >= lc_O && lc_F <= rc_O) || (rc_F >= lc_O && rc_F <= rc_O) || (lc_O >= lc_F && lc_O <= rc_F) || (rc_O >= lc_F && rc_O <= rc_F))) {
+            return false;
+        }
+        
+        lc_O = base.middleX - (base.width / 2);
+        rc_O = base.middleX + (base.width / 2);
+        
+        //Linke X koordinate für lc_F
+        lc_F = ulX;
+        
+        if (urX < lc_F) {
+            lc_F = urX;
+        }
+        
+        if (dlX < lc_F) {
+            lc_F = dlX;
+        }
+        
+        if (drX < lc_F) {
+            lc_F = drX;
+        }
+        
+        //Rechte X koordinate für rc_F
+        rc_F = ulX;
+        
+        if (urX > rc_F) {
+            rc_F = urX;
+        }
+        
+        if (dlX > rc_F) {
+            rc_F = dlX;
+        }
+        
+        if (drX > rc_F) {
+            rc_F = drX;
+        }
+        
+        if (!((lc_F >= lc_O && lc_F <= rc_O) || (rc_F >= lc_O && rc_F <= rc_O) || (lc_O >= lc_F && lc_O <= rc_F) || (rc_O >= lc_F && rc_O <= rc_F))) {
+            return false;
+        }
+        
+        return collision;
     }
     
     public  void setRotation (double angle) {
         this.rotation = angle;
         
-        Vector2D helpingVector = new Vector2D(middleX,middleY,x,y); //Vektor der auf die eckpunkte (x,y) von der mitte (middleX, middleY) zeigt, helping vektor weil er öfters benutzt werden sollte, im endeffekt aber nur einmal benutzt wurde
-        Vector2D widthV = new Vector2D(width,0); //Vektor der von den eckpunkten (x,y) mit der länge width nach rechts zu dem eckpunkt (x + width, y) zeigt, also die obere Kante von dem Rechteck
-        Vector2D heightV = new Vector2D(0,height); //Vektor der von den eckpunkten (x,y) mit der länge height nach unten zu dem eckpunkt (x, y + height) zeigt, also die linke Kante von dem Rechteck
+        Vector2D ul = new Vector2D(this.middleX,this.middleY,this.middleX - (this.width / 2),this.middleY - (this.height / 2)).getRotatedVector(rotation);
+        Vector2D ur = new Vector2D(this.middleX,this.middleY,this.middleX + (this.width / 2),this.middleY - (this.height / 2)).getRotatedVector(rotation);
+        Vector2D dl = new Vector2D(this.middleX,this.middleY,this.middleX - (this.width / 2),this.middleY + (this.height / 2)).getRotatedVector(rotation);
+        Vector2D dr = new Vector2D(this.middleX,this.middleY,this.middleX + (this.width / 2),this.middleY + (this.height / 2)).getRotatedVector(rotation);
         
-        helpingVector = helpingVector.getRotatedVector(this.rotation); //Rotieren des Vektors zu den Eckpunkten um die gespeicherte gradzahl. Er zeigt am ende also von den mittelkoordinaten zu dem rotierten eckpunkt
-        widthV = widthV.getRotatedVector(rotation); //Rotieren des weiten vektors um die gleiche gradzahl  sodass die obere kante auch entsprechend gekippt wird
-        heightV = heightV.getRotatedVector(rotation); //Rotieren des höhen vektors um die gradzahl, dass auch die linke kante entsprechend gekippt wird
+        this.x = this.middleX + ul.getX();
+        this.y = this.middleY + ul.getY();
         
-        int currentX = (int)(this.middleX + helpingVector.getX()); //In currentX werden die tatsächlichen eckpunkte (linke, obere ecke) nach dem rotieren um den mittelpunkt gespeichert
-        int currentY = (int)(this.middleY + helpingVector.getY()); //also mittelkoordinaten + rotierterVektor
+        this.x2 = this.middleX + ur.getX();
+        this.y2 = this.middleY + ur.getY();
         
-        int verticalX = currentX; //die berechneten eckpunkte werden in die "working" variablen kopiert, mit denen nachher gerechnet wird
-        int verticalY = currentY;
+        this.x3 = this.middleX + dl.getX();
+        this.y3 = this.middleY + dl.getY();
         
-        int workingX = verticalX;
-        int workingY = verticalY;
-        
-        int widthLength = (int)widthV.getLength(); //Es wird die Länge der gedrehten oberen kante ermittelt, wird für die anzahl der durchläufe in der forschleife nachher verwendet
-        int heightLength = (int)heightV.getLength(); //Die Länge der gedrehten linken Katen wird ermittelt, ebenfalls für die forschleife
-        
-        if (widthLength <= 0) { //Falls die weite so klein war das der gedrehte vektor aufgrund von der rundung in int eine länge von 0 hätte wird er hier auf 1 gesetzt, damit die forschleife mindestens einmal ausgeführt wird
-                                //also wenigstens der linke obere eckpunkt auf collision geprüft wird
-            widthLength = 1;
-        }
-        
-        if (heightLength <= 0) { //Gleiches bei der länge der höhe
-            heightLength = 1;
-        }
-        
-        widthV = widthV.getUnitVector(); //die gedrehten vektoren werden auf die länge 1 gesetzt damit sie nachher multipliziert werden können
-        heightV = heightV.getUnitVector(); //gleiches bei höhe
-        
-        this.coord = new Point[widthLength][heightLength];
-        
-        Label: //Label um aus der innersten for schleife alle schleifen zu beenden und mit dem return statement fortzufahren
-        for (int i = 0;i < heightLength;i++) { //Äußere Schleife geht die koordinaten der gedrehten linken Kante durch, sie läuft also so lange wie die linke Kante lang ist (in gerundeten int werten)
-            verticalX = currentX + (int)heightV.multiplyWithNumber(i).getX(); //zu den eckpunkten werden die koordinaten des höhenvektors dazuaddiert der vorher mit der i variable multipliziert wird, dadurch werden
-            verticalY = currentY + (int)heightV.multiplyWithNumber(i).getY(); //Die koordinaten der linken Kante schritt für schritt durchgegangen
-            
-            workingX = verticalX; //Die workingX werden mit den aktualisierten currentX gleichgesetzt damit mit den workingX gerechnet werden kann und die currentX unangetastet bleiben
-            workingY = verticalY; //Die currentX sind immer die koordinaten von der gedrehten linken kante, wäre sie NICHT GEDREHT, wären die current Koordinaten (0,0) - (0,1) - (0,2) - (0,3) - usw. es würden also immer die Y koordinaten erhöht werden, also die vertikale anfangslinie
-            
-            for (int j = 0;j < widthLength;j++) { //Innere Schleife geht die koordinaten der oberen Kante durch, sie läuft solange wie die obere Kante lang war.
-                workingX = verticalX + (int)widthV.multiplyWithNumber(j).getX(); //Die working koordinaten sind immer die versetzte obere Kante, wäre sie NICHT GEDREHT wären sie im ersten durchlauf (0,0) - (1,0) - (2,0) - (3,0) - usw. es würde also immer die X koordinaten erhöht werden
-                workingY = verticalY + (int)widthV.multiplyWithNumber(j).getY(); //Es wird also die in der äußeren schleife immer um eins nach unten versetzte horizontale Linie durchgegangen
-                
-                this.coord[j][i] = new Point(workingX,workingY);
-            }
-        }
+        this.x4 = this.middleX + dr.getX();
+        this.y4 = this.middleY + dr.getY();
     }
     
     public void draw(Graphics2D g2d) {
-        g2d.drawLine((int)Background.X + (int)this.coord[0][0].getX(),(int)Background.Y +  (int)this.coord[0][0].getY(),(int)Background.X +  (int)this.coord[this.coord.length - 1][0].getX(),(int)Background.Y +  (int)this.coord[this.coord.length - 1][0].getY());
-        g2d.drawLine((int)Background.X + (int)this.coord[this.coord.length - 1][0].getX(), (int)Background.Y + (int)this.coord[this.coord.length - 1][0].getY(),(int)Background.X +  (int)this.coord[this.coord.length - 1][this.coord[0].length - 1].getX(),(int)Background.Y +  (int)this.coord[this.coord.length - 1][this.coord[0].length - 1].getY());
-        g2d.drawLine((int)Background.X + (int)this.coord[this.coord.length - 1][this.coord[0].length - 1].getX(),(int)Background.Y +  (int)this.coord[this.coord.length - 1][this.coord[0].length - 1].getY(),(int)Background.X +  (int)this.coord[0][this.coord[0].length - 1].getX(),(int)Background.Y +  (int)this.coord[0][this.coord[0].length - 1].getY());
-        g2d.drawLine((int)Background.X + (int)this.coord[0][this.coord[0].length - 1].getX(),(int)Background.Y +  (int)this.coord[0][this.coord[0].length - 1].getY(),(int)Background.X +  (int)this.coord[0][0].getX(),(int)Background.Y +  (int)this.coord[0][0].getY());
+        g2d.drawLine((int)(Background.X + this.x), (int)(Background.Y + this.y), (int)(Background.X + this.x2), (int)(Background.Y + this.y2));
+        g2d.drawLine((int)(Background.X + this.x2), (int)(Background.Y + this.y2), (int)(Background.X + this.x4), (int)(Background.Y + this.y4));
+        g2d.drawLine((int)(Background.X + this.x4), (int)(Background.Y + this.y4), (int)(Background.X + this.x3), (int)(Background.Y + this.y3));
+        g2d.drawLine((int)(Background.X + this.x3), (int)(Background.Y + this.y3), (int)(Background.X + this.x), (int)(Background.Y + this.y));
     }
     
     public String toString() {
         String s = "FixedCollisionBox:\n";
         s += "rotation angle: "+this.rotation+" \n\n";
-        
-        for (int i = 0;i < this.coord.length;i++) {
-            for (int j = 0;j < this.coord[i].length;j++) {
-                s += (""+ this.coord[i][j].getX() + ":" + this.coord[i][j].getY() + " ");
-            }
-            
-            s += "\n";
-        }
-        
+        s += super.toString();
         return s;
     }
 }

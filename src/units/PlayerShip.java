@@ -4,119 +4,277 @@
  */
 package units;
 
+import java.awt.event.MouseEvent;
 import main.MainLoop;
 import support.Background;
+import support.FPSManager;
 import support.FixedCollisionBox;
 import support.Resources;
 import support.Settings;
 import utils.Vector2D;
 
 public class PlayerShip extends Ship {
-    private float realMiddleX;
-    private float realMiddleY;
+    public static int[] SLOTCONTENTS = new int[0];
     
-    public PlayerShip(int typ,int width,int height,int x,int y,float health, Resources resources) {
-        super(typ, width, height, x, y, health, resources);
+    private double drawMiddleX;
+    private double drawMiddleY;
+    
+    private boolean uiElementClicked;
+    
+    public PlayerShip(int typ,int width,int height,int x,int y,double health, Resources resources,Explosion explosion,int fraction) {
+        super(typ, width, height, x, y, health, resources,explosion,fraction);
         
-        this.realMiddleX = this.middleX;
-        this.realMiddleY = this.middleY;
+        this.drawMiddleX = x + Background.X;
+        this.drawMiddleY = y + Background.Y;
+        
+        this.uiElementClicked = false;
+        
+        updateSlotContents();
     }
     
     public void updateShip(int mausX,int mausY,int canvasWidth,int canvasHeight) {
-        this.realMiddleX = (-Background.X) + (canvasWidth / 2); //Die Realen X Koordinaten (mit dem Background abgestimmt und POSITIV, werden aktualisiert:
-        this.realMiddleY = (-Background.Y) + (canvasHeight / 2);//Background koordinate + hälfte der Fensterbreite bzw Fensterhöhe
+        Background.move(this.force.multiplyWithNumber(FPSManager.DELTA)); //Statt das schiff mit force zu bewegen wird der Background mit Force bewegt
         
-        Background.move(this.force); //Statt das schiff mit force zu bewegen wird der Background mit Force bewegt
+        this.middleX = (-Background.X) + (canvasWidth / 2); //Die Realen X Koordinaten (mit dem Background abgestimmt und POSITIV, werden aktualisiert:
+        this.middleY = (-Background.Y) + (canvasHeight / 2);//Background koordinate + hälfte der Fensterbreite bzw Fensterhöhe
         
-        this.posX = this.middleX - (this.width / 2.0F);
-        this.posY = this.middleY - (this.height / 2.0F);
+        this.drawMiddleX = canvasWidth / 2;
+        this.drawMiddleY = canvasHeight / 2;
+        
+        this.posX = this.drawMiddleX - (this.width / 2.0F);
+        this.posY = this.drawMiddleY - (this.height / 2.0F);
+        
+        //Slot changing mechanics
+        if (this.activeSlot != Settings.SLOT_VALUE) {
+            this.setSlot(Settings.SLOT_VALUE);
+        }
+        
+        if (Settings.INCREASE_SLOT) {
+            this.increaseSlot();
+            Settings.INCREASE_SLOT = false;
+        }
+        
+        if (Settings.DECREASE_SLOT) {
+            this.decreaseSlot();
+            Settings.DECREASE_SLOT = false;
+        }
+        
+        Settings.SLOT_VALUE = this.activeSlot;
         
         for (int i = 0;i < this.thrusterForward.length; i++) {
-            this.thrusterForward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterForward[i] != null) {
+                this.thrusterForward[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
         for (int i = 0;i < this.thrusterBackward.length; i++) {
-            this.thrusterBackward[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterBackward[i] != null) {
+                this.thrusterBackward[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
         for (int i = 0;i < this.thrusterFrontLeft.length; i++) {
-            this.thrusterFrontLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterFrontLeft[i] != null) {
+                this.thrusterFrontLeft[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
         for (int i = 0;i < this.thrusterBackLeft.length; i++) {
-            this.thrusterBackLeft[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterBackLeft[i] != null) {
+                this.thrusterBackLeft[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
         for (int i = 0;i < this.thrusterFrontRight.length; i++) {
-            this.thrusterFrontRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterFrontRight[i] != null) {
+                this.thrusterFrontRight[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
         for (int i = 0;i < this.thrusterBackRight.length; i++) {
-            this.thrusterBackRight[i].updatePositionData(this.middleX, this.middleY,this.realMiddleX,this.realMiddleY);
+            if (thrusterBackRight[i] != null) {
+                this.thrusterBackRight[i].updatePositionData(this.middleX,this.middleY);
+            }
         }
         
-        for (int i = 0;i < this.weapons.length;i++) {
-            this.weapons[i].updatePositionData(this.middleX, this.middleY);
+        for (int i = 0;i < this.weaponSlots.length;i++) {
+            for (int j = 0;j < this.weaponSlots[i].length;j++) {
+                if (weaponSlots[i][j] != null) {
+                    this.weaponSlots[i][j].update(this.middleX, this.middleY,(int)(-Background.X + mausX),(int)(-Background.Y + mausY),this.rotationDegree);
+                }
+            }
         }
         
-        manageRotation(mausX, mausY);
+        for (int i = 0;i < this.turretSlot.length;i++) {
+            for (int j = 0;j < this.turretSlot[i].length;j++) {
+                if (this.turretSlot[i][j] != null) {
+                    this.turretSlot[i][j].update(this.middleX, this.middleY,(int)(-Background.X + mausX),(int)(-Background.Y + mausY),this.rotationDegree);
+                }
+            }
+        }
         
-        this.boxCollider.updateBox(this.realMiddleX, this.realMiddleY);
+        if (!Settings.IGNORE_MOUSE_MOVEMENT) {
+            manageRotation(-Background.X + mausX, -Background.Y + mausY);
+        }
+        
+        calculateRotationChange();
+        
+        this.boxCollider.updateBox(this.middleX, this.middleY);
         this.boxCollider.setRotation(this.rotationDegree);
         
-        for (int i = 0;i < MainLoop.bullets.size();i++) {
-            Bullet bullet = (Bullet)MainLoop.bullets.getElementAt(i);
-            
-            if (bullet.isHit(boxCollider,this.realMiddleX - this.width / 2,this.realMiddleY - this.height / 2,this.width,this.height,Bullet.NEUTRAL)) {
-                //Ship is hit
-                MainLoop.bullets.remove(i);
+        //true && true
+        //true && (true && true)
+        
+        if (Settings.SHOOT_Key_down && ((Settings.KeySHOOT == MouseEvent.BUTTON1 && MainLoop.ui_click_happened == false) || Settings.KeySHOOT != MouseEvent.BUTTON1)) {
+            if (this.activeSlot < this.weaponSlots.length) {
+                for (int i = 0;i < this.weaponSlots[this.activeSlot].length;i++) {
+                    if (this.weaponBattery != null && this.weaponSlots[this.activeSlot][i] != null) {
+                        double energyLoss = this.weaponSlots[this.activeSlot][i].shoot(this.weaponBattery.getAvailableEnergy());
+                        this.weaponBattery.energyLoss(energyLoss);
+                    }
+
+                    if (this.reactor != null) {
+                        reactor.reactorDrain();
+                    }
+                }
+            } else if (this.activeSlot < this.weaponSlots.length + this.turretSlot.length) {
+                for (int i = 0;i < this.turretSlot[this.activeSlot - this.weaponSlots.length].length;i++) {
+                    if (this.weaponBattery != null && this.turretSlot[this.activeSlot - this.weaponSlots.length][i] != null) {
+                        double energyLoss = this.turretSlot[this.activeSlot - this.weaponSlots.length][i].shoot(this.weaponBattery.getAvailableEnergy());
+                        this.weaponBattery.energyLoss(energyLoss);
+                    }
+
+                    if (this.reactor != null) {
+                        reactor.reactorDrain();
+                    }
+                }
             }
-            
-            int a = 0;
         }
         
-        if (Settings.SHOOT_Key_down) {
-            for (int i = 0;i < this.weapons.length;i++) {
-                this.weapons[i].shoot();
+        this.uiElementClicked = false;
+        
+        if (this.shield != null) {
+            this.shield.update(this.middleX, this.middleY, this.rotationDegree);
+        }
+        
+        if (this.weaponBattery != null && this.reactor != null) {
+            this.weaponBattery.energyCharge(this.reactor.getEnergyOuput());
+        }
+        
+        if (this.slotChanged) {
+            updateSlotContents();
+            this.slotChanged = false;
+        }
+    }
+    
+    private void updateSlotContents() {
+        SLOTCONTENTS = new int[this.weaponSlots.length + this.turretSlot.length];
+        
+        for (int i = 0;i < weaponSlots.length;i++) {
+            try {
+                SLOTCONTENTS[i] = weaponSlots[i][0].getWeaponType();
+            } catch (Exception e) {
+                SLOTCONTENTS[i] = 0;
+            }
+        }
+        
+        for (int i = this.weaponSlots.length;i < this.weaponSlots.length + this.turretSlot.length;i++) {
+            try {
+                SLOTCONTENTS[i] = turretSlot[i - this.weaponSlots.length][0].getWeaponType() * (-1);
+            } catch (Exception e) {
+                SLOTCONTENTS[i] = 0;
             }
         }
     }
     
-    private void manageRotation(int mausX,int mausY) {
-        boolean leftOf = this.direction.isLeftOf(new Vector2D(mausX-this.middleX,mausY-this.middleY));
-        Vector2D mouse = new Vector2D(mausX-this.middleX,mausY-this.middleY);
+    @Override
+    protected WeaponBase changeWeaponInSlot(int slot,WeaponBase weapon, int which) {
+        WeaponBase oldWeapon = null;
         
-        //(float) zum runden (statt 179.9999...° => 180.0°)
-        if((float)(this.direction.getAngle(mouse)) > 1) {
-            if (leftOf) {
-                if((float)(this.direction.getAngle(mouse)) >= this.rotationLeftThrust) {
-                    this.direction = this.direction.getRotatedVector(this.rotationLeftThrust);
+        if (which == 1) {
+            oldWeapon = weaponSlots[slot][0];
+            for (int i = 0;i < this.weaponSlots[slot].length;i++) {
+                if (weapon != null) {
+                    this.weaponSlots[slot][i] = new Weapon(weapon.getWeaponType(),this.weaponBuilder[slot][i].getWidth(),this.weaponBuilder[slot][i].getHeight(),this.weaponBuilder[slot][i].getxOffset(),this.weaponBuilder[slot][i].getyOffset(),(int)this.middleX,(int)this.middleY,this.weaponBuilder[slot][i].getRotationDegree(),weapon.getCoolDown(),weapon.getShootType(),weapon.getEnergyCost(),weaponBuilder[slot][i].getSide(),weaponBuilder[slot][i].isBelow(),new Bullet(weapon.getBullet()));
+                    this.weaponSlots[slot][i].setBulletFraction(this.fraction);
                 } else {
-                    this.direction = this.direction.getRotatedVector(this.direction.getAngle(mouse));
-                }
-            } else {
-                if((float)(this.direction.getAngle(mouse)) >= this.rotationRightThrust) {
-                    this.direction = this.direction.getRotatedVector(this.rotationRightThrust * -1.0);
-                } else {
-                    this.direction = this.direction.getRotatedVector(this.direction.getAngle(mouse) * -1.0);
+                    this.weaponSlots[slot][i] = null;
                 }
             }
         } else {
-            this.direction = mouse.getUnitVector();
+            oldWeapon = turretSlot[slot - this.weaponSlots.length][0];
+            for (int i = 0;i < this.turretSlot[slot - this.weaponSlots.length].length;i++) {
+                if (weapon != null) {
+                    this.turretSlot[slot - this.weaponSlots.length][i] = new Turret(weapon.getWeaponType(),this.weaponBuilder[slot][i].getWidth(),this.weaponBuilder[slot][i].getHeight(),this.weaponBuilder[slot][i].getxOffset(),this.weaponBuilder[slot][i].getyOffset(),(int)this.middleX,(int)this.middleY,this.weaponBuilder[slot][i].getRotationDegree(),weapon.getCoolDown(),weapon.getShootType(),weapon.getEnergyCost(),weaponBuilder[slot][i].getSide(),new Bullet(weapon.getBullet()));
+                    this.turretSlot[slot - this.weaponSlots.length][i].setBulletFraction(this.fraction);
+                } else {
+                    this.turretSlot[slot - this.weaponSlots.length][i] = null;
+                }
+            }
         }
         
-        calculateRotationDegree();
+        this.slotChanged = true;
+        return oldWeapon;
     }
     
-    public float getRealMiddleX() {
-        return this.realMiddleX;
+    public void shieldRingClicked(String which) {
+        if (this.shield != null) {
+            this.shield.shiftEnergyTo(which);
+        }
+        this.uiElementClicked = true;
     }
     
-    public float getRealMiddleY() {
-        return this.realMiddleY;
+    public double getDrawMiddleX() {
+        return this.drawMiddleX;
+    }
+    
+    public double getDrawMiddleY() {
+        return this.drawMiddleY;
+    }
+    
+    public void setDrawMiddleX(double drawMiddleX) {
+        this.middleX = (-Background.X) + drawMiddleX;
+    }
+    
+    public void setDrawMiddleY(double drawMiddleY) {
+        this.middleY = (-Background.Y) + drawMiddleY;
     }
     
     public FixedCollisionBox getBox() {
         return this.boxCollider;
+    }
+    
+    public double getEnergy() {
+        if (this.weaponBattery != null) {
+            return this.weaponBattery.getAvailableEnergy();
+        } else {
+            return 0;
+        }
+    }
+    
+    public double getEnergyCapacity() {
+        if (this.weaponBattery != null) {
+            return this.weaponBattery.getCapacity();
+        } else {
+            return 0;
+        }
+    }
+    
+    public double getShieldCapacity() {
+        if (this.shield != null) {
+            return this.shield.getCapacity();
+        } else {
+            return 0;
+        }
+    }
+    
+    public double getShieldCurrentEnergyStatus(String which) {
+        double status = 0;
+        
+        if (this.shield != null) {
+            status = this.shield.getEnergy(which);
+        }
+        
+        return status;
     }
 }

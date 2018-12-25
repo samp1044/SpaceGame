@@ -12,16 +12,25 @@ import utils.Vector2D;
  * @author Sami
  */
 public class CollisionBox {
-    public float x;
-    public float y;
+    public double x;
+    public double y;
+    
+    public double x2;
+    public double y2;
+    
+    public double x3;
+    public double y3;
+    
+    public double x4;
+    public double y4;
     
     public int width;
     public int height;
     
-    protected float middleX;
-    protected float middleY;
+    protected double middleX;
+    protected double middleY;
     
-    public CollisionBox(float middleX,float middleY,int width,int height) {
+    public CollisionBox(double middleX,double middleY,int width,int height) {
         this.middleX = middleX;
         this.middleY = middleY;
         
@@ -30,15 +39,29 @@ public class CollisionBox {
         
         this.x = this.middleX - (this.width / 2);
         this.y = this.middleY - (this.height / 2);
-    }
-    
-    public CollisionBox(double middleX,double middleY,int width,int height) {
-        this((float)middleX,(float)middleY,width,height);
+        
+        this.x2 = this.middleX + (this.width / 2);
+        this.y2 = this.middleY - (this.height / 2);
+        
+        this.x3 = this.middleX - (this.width / 2);
+        this.y3 = this.middleY + (this.height / 2);
+        
+        this.x4 = this.middleX + (this.width / 2);
+        this.y4 = this.middleY + (this.height / 2);
     }
     
     public CollisionBox(CollisionBox b) {
         this.x = b.x;
         this.y = b.y;
+        
+        this.x2 = b.x2;
+        this.y2 = b.y2;
+        
+        this.x3 = b.x3;
+        this.y3 = b.y3;
+        
+        this.x4 = b.x4;
+        this.y4 = b.y4;
         
         this.width = b.width;
         this.height = b.height;
@@ -47,12 +70,21 @@ public class CollisionBox {
         this.middleY = b.middleY;
     }
     
-    public void updateBox(float middleX, float middleY) {
+    public void updateBox(double middleX, double middleY) {
         this.middleX = middleX;
         this.middleY = middleY;
         
         this.x = this.middleX - (this.width / 2);
         this.y = this.middleY - (this.height / 2);
+        
+        this.x2 = this.middleX + (this.width / 2);
+        this.y2 = this.middleY - (this.height / 2);
+        
+        this.x3 = this.middleX - (this.width / 2);
+        this.y3 = this.middleY + (this.height / 2);
+        
+        this.x4 = this.middleX + (this.width / 2);
+        this.y4 = this.middleY + (this.height / 2);
     }
     
     public boolean isOverlapping(CollisionBox b) {
@@ -117,13 +149,55 @@ public class CollisionBox {
         g2d.drawLine((int)Background.X + (int)this.x,(int)Background.Y + (int)this.y + this.height,(int)Background.X + (int)this.x,(int)Background.Y + (int)this.y);
     }
     
+    public double getMiddleX() {
+        return this.middleX;
+    }
+    
+    public double getMiddleY() {
+        return this.middleY;
+    }
+    
+    public double getUpperLeftX() {
+        return this.x;
+    }
+    
+    public double getUpperLeftY() {
+        return this.y;
+    }
+    
+    public double getUpperRightX() {
+        return this.x2;
+    }
+    
+    public double getUpperRightY() {
+        return this.y2;
+    }
+    
+    public double getDownLeftX() {
+        return this.x3;
+    }
+    
+    public double getDownLeftY() {
+        return this.y3;
+    }
+    
+    public double getDownRightX() {
+        return this.x4;
+    }
+    
+    public double getDownRightY() {
+        return this.y4;
+    }
+    
     @Override
     public String toString() {
         String s = "CollisionBox:\n\n";
         
+        s += "x: "+this.x+" y: "+this.y+" x2: "+this.x2+" y2: "+this.y2+" x3: "+this.x3+" y3: "+this.y3+" x4: "+this.x4+" y4: "+this.y4+"\n\n";
+        
         for (int i = (int)y; i < (int)(y + height);i++) { //Y
             for (int j = (int)x;j < (int)(x + width);j++) { //X
-                s += ("" + i + ":" + j + " ");
+                s += ("" + j + ":" + i + " ");
             }
             
             s+= "\n";

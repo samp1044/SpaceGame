@@ -16,8 +16,10 @@ public class ObjectList {
     }
     
     public void add(Object object) {
-        enlargeField();
-        this.objects[this.objects.length - 1] = object;
+        if (object != null) {
+            enlargeField();
+            this.objects[this.objects.length - 1] = object;
+        }
     }
     
     public Object getElementAt(int index) {
@@ -44,6 +46,32 @@ public class ObjectList {
             
             this.objects = dummy;
         }
+    }
+    
+    public void remove(Object object) {
+        if (object != null) {
+            for (int i = 0;i < objects.length;i++) {
+                if (object.equals(objects[i])) {
+                    remove(i);
+                    break;
+                }
+            }
+        }
+    }
+    
+    public boolean contains(Object object) {
+        boolean contained = false;
+        
+        if (object != null) {
+            for (int i = 0;i < objects.length;i++) {
+                if (object.equals(objects[i])) {
+                    contained = true;
+                    break;
+                }
+            }
+        }
+        
+        return contained;
     }
     
     public int size() {

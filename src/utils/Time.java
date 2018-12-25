@@ -112,6 +112,26 @@ public class Time {
         }
     }
     
+    public String getTimeString() {
+        String stundenS = ""+this.stunden;
+        String minutenS = ""+this.minuten;
+        String sekundenS = ""+this.sekunden;
+        
+        if (this.stunden < 10) {
+            stundenS = "0"+this.stunden;
+        }
+        
+        if (this.minuten < 10) {
+            minutenS = "0"+this.minuten;
+        }
+        
+        if (this.sekunden < 10) {
+            sekundenS = "0"+this.sekunden;
+        }
+        
+        return ""+stundenS+""+minutenS+""+sekundenS;
+    }
+    
     public String toString() {
         String stundenS = ""+this.stunden;
         String minutenS = ""+this.minuten;
